@@ -1,47 +1,37 @@
-from auth import login
-from account import CheckingAccount, SavingsAccount
-from transactions import deposit, withdraw, transfer
-from visualizer import plot_balances
-import sys
+import json
+import os
 
-def main():
-    print("Welcome to the CLI Banking Application")
-    user = login()
-    account_type = input("Select account type (Checking/Savings): ").lower()
-    
-    if account_type == "checking":
-        account = CheckingAccount(user)
-    elif account_type == "savings":
-        account = SavingsAccount(user)
+USERS_FILE = 'users.json'
+
+def load_users():
+    if not os.path.exists(USERS_FILE):
+        return {}
+    with open(USERS_FILE, 'r') as f:
+        return json.load(f)
+
+def save_users(users):
+    with open(USERS_FILE, 'w') as f:
+        json.dump(users, f)
+
+def register():
+    users = load_users()
+    username = input("Enter a new username: ")
+    if username in users:
+        print("Username already exists.")
+        return False
+    password = input("Enter a new password: ")
+    users[username] = {'password': password, 'balance': 0.0}
+    save_users(users)
+    print("Registration successful.")
+    return True
+
+def login():
+    users = load_users()
+    username = input("Enter your username: ")
+    password = input("Enter your password: ")
+    if username in users and users[username]['password'] == password:
+        print("Login successful.")
+        return username
     else:
-        print("Invalid account type. Exiting.")
-        return
-
-    while True:
-        print("\nMain Menu:")
-        print("1. Deposit")
-        print("2. Withdraw")
-        print("3. View Transactions")
-        print("4. Show Balance")
-        print("5. View Monthly Balance Plot")
-        print("6. Exit")
-        
-        choice = input("Enter choice: ")
-        
-        if choice == "1":
-            amount = float(input("Enter deposit amount: "))
-            deposit(account, amount)
-        elif choice == "2":
-            amount = float(input("Enter withdrawal amount: "))
-            withdraw(account, amount)
-        elif choice == "3":
-            show_transactions(account)
-        elif choice == "4":
-            print(f"Balance: {account.get_balance()}")
-        elif choice == "5":
-            plot_balance(account)
-        elif choice == "6":
-            print("Exiting application.")
-            break
-        else:
-            print("Invalid choice, please try again.")
+        print("Invalid credentials.")
+        return None
