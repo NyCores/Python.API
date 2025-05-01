@@ -1,27 +1,36 @@
-class Account:
-    def __init__(self, user):
-        self.user = user
-        self.balance = 0
-        self.transactions = []
+import json
+import os
 
-    def deposit(self, amount):
-        self.balance += amount
-        self.transactions.append(f"Deposited: ${amount}")
-    
-    def withdraw(self, amount):
-        if self.balance >= amount:
-            self.balance -= amount
-            self.transactions.append(f"Withdrew: ${amount}")
-        else:
-            print("Insufficient balance.")
+USERS_FILE = 'users.json'
 
-    def get_balance(self):
-        return self.balance
+def load_users():
+    if not os.path.exists(USERS_FILE):
+        return {}
+    with open(USERS_FILE, 'r') as f:
+        return json.load(f)
 
-class CheckingAccount(Account):
-    def __init__(self, user):
-        super().__init__(user)
+def save_users(users):
+    with open(USERS_FILE, 'w') as f:
+        json.dump(users, f)
 
-class SavingsAccount(Account):
-    def __init__(self, user):
-        super().__init__(user)
+def deposit(username):
+    users = load_users()
+    amount = float(input("Enter amount to deposit: "))
+    users[username]['balance'] += amount
+    save_users(users)
+    print(f"${amount} deposited successfully.")
+
+def withdraw(username):
+    users = load_users()
+    amount = float(input("Enter amount to withdraw: "))
+    if users[username]['balance'] >= amount:
+        users[username]['balance'] -= amount
+        save_users(users)
+        print(f"${amount} withdrawn successfully.")
+    else:
+        print("Insufficient balance.")
+
+def check_balance(username):
+    users = load_users()
+    balance = users[username]['balance']
+    print(f"Your current balance is: ${balance}")
