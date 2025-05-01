@@ -1,7 +1,8 @@
-from modules.auth import login
-from modules.transactions import deposit, withdraw, show_transactions
-from modules.account import Account, CheckingAccount, SavingsAccount
-from modules.plot import plot_balance
+from auth import login
+from account import CheckingAccount, SavingsAccount
+from transactions import deposit, withdraw, transfer
+from visualizer import plot_balances
+import sys
 
 def main():
     print("Welcome to the CLI Banking Application")
