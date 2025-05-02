@@ -46,3 +46,25 @@ def login_user():
     else:
         print("Incorrect password.")
         return None
+from storage import load_users, save_users
+from utils import hash_password, is_valid_username, is_valid_password
+
+class User:
+    def __init__(self, username, name, password_hash, balance=0.0):
+        self.username = username
+        self.name = name
+        self.password_hash = password_hash
+        self.balance = balance
+        self.accounts = []
+
+def register_user(username, password, name):
+    """Register a new user."""
+    users = load_users()
+    if username in users:
+        return False, "Username already exists."
+    if not is_valid_username(username):
+        return False, "Invalid username."
+    user = User(username, name, hash_password(password), 0)
+    users[username] = user
+    save_users(users)
+    return True, "User registered successfully."
