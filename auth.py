@@ -1,27 +1,48 @@
 import json
+import os
+import bcrypt
 
-def save_accounts(accounts, filename='accounts.json'):
-    with open(filename, 'w') as f:
-        json.dump([acc.__dict__ for acc in accounts], f)
+DATA_DIR = 'data'
+USERS_FILE = os.path.join(DATA_DIR, 'users.json')
 
-def load_accounts(filename='accounts.json'):
-    with open(filename, 'r') as f:
-        data = json.load(f)
-        return [Account(**acc) for acc in data]
+def load_users():
+    if not os.path.exists(USERS_FILE):
+        return {}
+    with open(USERS_FILE, 'r') as f:
+        return json.load(f)
 
-def login():
-    username = input("Enter username: ")
-    password = input("Enter password: ")
+def save_users(users):
+    os.makedirs(DATA_DIR, exist_ok=True)
+    with open(USERS_FILE, 'w') as f:
+        json.dump(users, f, indent=4)
 
-    try:
-        with open('data/users.json', 'r') as f:
-            users = json.load(f)
-    except FileNotFoundError:
-        users = {}
+def register_user():
+    users = load_users()
+    username = input("Enter a new username: ").strip()
+    if username in users:
+        print("Username already exists.")
+        return None
+    password = input("Enter a new password: ").strip()
+    hashed = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
+    users[username] = {
+        'password': hashed.decode('utf-8'),
+        'accounts': {}
+    }
+    save_users(users)
+    print("User registered successfully.")
+    return username
 
-    if username in users and users[username] == password:
-        print(f"Welcome back, {username}!")
+def login_user():
+    users = load_users()
+    username = input("Enter your username: ").strip()
+    if username not in users:
+        print("Username not found.")
+        return None
+    password = input("Enter your password: ").strip()
+    stored_hash = users[username]['password'].encode('utf-8')
+    if bcrypt.checkpw(password.encode('utf-8'), stored_hash):
+        print("Login successful.")
         return username
     else:
-        print("Invalid credentials. Please try again.")
-        return login()
+        print("Incorrect password.")
+        return None
