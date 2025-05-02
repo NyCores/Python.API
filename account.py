@@ -138,3 +138,21 @@ def get_transactions(username, account_type):
     for txn in transactions:
         print(f"{txn['date']}: {txn['type'].capitalize()} of ${txn['amount']:.2f}")
     return transactions
+
+from storage import save_accounts, load_accounts
+from utils import generate_account_id
+
+class Account:
+    def __init__(self, account_id, owner, balance=0.0):
+        self.account_id = account_id
+        self.owner = owner
+        self.balance = balance
+
+def create_account(owner, acc_type):
+    """Create a new account for a user."""
+    acc_id = generate_account_id(acc_type)
+    account = Account(acc_id, owner, 0.0)
+    accounts = load_accounts()
+    accounts[acc_id] = account
+    save_accounts(accounts)
+    return account
