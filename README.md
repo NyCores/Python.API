@@ -16,3 +16,4 @@ git clone https://github.com/NyCores/Python.API.git
 cd Python.API
 pip install -r requirements.txt
 python main.py
+python reports.py
